@@ -40,7 +40,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     }
     
     // ตรวจสอบการยืนยันรหัสผ่าน
-    if(empty(trim($_POST["confirm_password"]))){
+    if(empty(trim($_POST["confirm_password"]))) {
         $confirm_password_err = "กรุณายืนยันรหัสผ่าน";     
     } else{
         $confirm_password = trim($_POST["confirm_password"]);
@@ -58,7 +58,8 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
             $param_password = password_hash($password, PASSWORD_DEFAULT);
             
             if(mysqli_stmt_execute($stmt)){
-                header("location: login.php");
+                header("location: index.php");
+                exit();
             } else{
                 echo "มีบางอย่างผิดพลาด กรุณาลองใหม่อีกครั้ง";
             }
