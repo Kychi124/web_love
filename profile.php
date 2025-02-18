@@ -84,7 +84,7 @@ $level = isset($_SESSION["level"]) ? $_SESSION["level"] : "user";
                             <li><a class="dropdown-item" href="login.php">เข้าสู่ระบบ</a></li>
                             <li><a class="dropdown-item" href="register.php">ลงทะเบียน</a></li>
                         <?php else: ?>
-                            <li><a class="dropdown-item" href="profile.php">โปรไฟล์</a></li>
+                            <li><a class="dropdown-item" href="profile.php">Profile</a></li>
                             <?php if ($level === "admin"): ?>
                                 <li><a class="dropdown-item" href="back_office.php">Back Office</a></li>
                             <?php endif; ?>

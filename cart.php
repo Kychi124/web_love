@@ -71,6 +71,19 @@ if(!empty($_SESSION["cart"])){
                         </a>
                     </li>
                 </ul>
+                <ul class="navbar-nav">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-user"></i>
+                        <?php echo isset($_SESSION["email"]) ? htmlspecialchars($_SESSION["email"]) : "Guest"; ?>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                        <li><a class="dropdown-item" href="profile.php">Profile</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="logout.php">ออกจากระบบ</a></li>
+                    </ul>
+                </li>
+            </ul>
             </div>
         </div>
     </nav>

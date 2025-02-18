@@ -4,24 +4,17 @@ require_once "config.php";
 session_start();
 
 // ตรวจสอบการล็อกอิน
-if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
+if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
     header("location: login.php");
     exit;
 }
 
-// เริ่มต้นตะกร้าสินค้าถ้ายังไม่มี
-if(!isset($_SESSION["cart"])){
-    $_SESSION["cart"] = array();
-}
+// ตรวจสอบระดับผู้ใช้ (แก้ไข)
+$level = isset($_SESSION["user_level"]) ? $_SESSION["user_level"] : "user";
 
-// จัดการการเพิ่มสินค้าลงตะกร้า
-if(isset($_POST["add_to_cart"]) && isset($_POST["product_id"])){
-    $product_id = $_POST["product_id"];
-    if(isset($_SESSION["cart"][$product_id])){
-        $_SESSION["cart"][$product_id]++;
-    } else {
-        $_SESSION["cart"][$product_id] = 1;
-    }
+// เริ่มต้นตะกร้าสินค้าถ้ายังไม่มี
+if (!isset($_SESSION["cart"])) {
+    $_SESSION["cart"] = array();
 }
 
 // ดึงข้อมูลสินค้าทั้งหมด
@@ -44,7 +37,6 @@ $result = mysqli_query($conn, $sql);
 <body>
 <?php
 // ตรวจสอบว่าคีย์ "level" มีค่าหรือไม่ ถ้าไม่มีให้กำหนดค่าเริ่มต้นเป็น "user"
-$level = isset($_SESSION["level"]) ? $_SESSION["level"] : "user";
 ?>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container">
@@ -86,15 +78,6 @@ $level = isset($_SESSION["level"]) ? $_SESSION["level"] : "user";
         </div>
     </div>
 </nav>
-
-<?php
-// เช็คระดับผู้ใช้หลังจากล็อกอิน
-if ($level === "admin") {
-    header("location: back_office.php");
-    exit;
-}
-?>
-
     <div class="container mt-4">
         <div class="row">
             <?php while($row = mysqli_fetch_assoc($result)): ?>

@@ -5,7 +5,12 @@ session_start();
 
 // ถ้าผู้ใช้ล็อกอินอยู่แล้ว ให้ส่งไปที่หน้า index.php
 if (isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true) {
-    header("location: index.php");
+    // ตรวจสอบระดับผู้ใช้แล้วเปลี่ยนเส้นทาง
+    if ($_SESSION["user_level"] === "admin") {
+        header("location: back_office.php");
+    } else {
+        header("location: index.php");
+    }
     exit;
 }
 
@@ -26,9 +31,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     if (empty($email_err) && empty($password_err)) {
-        // ดึง user_id, email, password_hash และ level จากฐานข้อมูล
-        $sql = "SELECT user_id, email, password_hash, level FROM users WHERE email = ?";
-        
+        // ดึงข้อมูล user จากฐานข้อมูล
+        $sql = "SELECT user_id, email, password_hash, user_level FROM users WHERE email = ?";
+
         if ($stmt = mysqli_prepare($conn, $sql)) {
             mysqli_stmt_bind_param($stmt, "s", $param_email);
             $param_email = $email;
@@ -40,15 +45,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     mysqli_stmt_bind_result($stmt, $id, $email, $hashed_password, $level);
                     if (mysqli_stmt_fetch($stmt)) {
                         if (password_verify($password, $hashed_password)) {
-                            // สร้างเซสชัน
-                            session_start();
-                            
+                            // เริ่ม session (ถ้ายังไม่มี)
+                            if (session_status() == PHP_SESSION_NONE) {
+                                session_start();
+                            }
+
                             $_SESSION["loggedin"] = true;
                             $_SESSION["user_id"] = $id;
                             $_SESSION["email"] = $email;
-                            $_SESSION["level"] = $level; // ✅ กำหนดค่า level
+                            $_SESSION["user_level"] = $level; // ✅ กำหนดค่า level
 
-                            // ถ้าเป็น admin ให้ไปหน้า back_office.php
+                            // ✅ ตรวจสอบ user level แล้วเปลี่ยนเส้นทาง
                             if ($level === "admin") {
                                 header("location: back_office.php");
                             } else {
@@ -63,7 +70,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     $login_err = "อีเมลหรือรหัสผ่านไม่ถูกต้อง";
                 }
             } else {
-                echo "มีบางอย่างผิดพลาด กรุณาลองใหม่อีกครั้ง";
+                $login_err = "เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง";
             }
             mysqli_stmt_close($stmt);
         }
@@ -71,7 +78,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     mysqli_close($conn);
 }
 ?>
-
 
 <!DOCTYPE html>
 <html>
@@ -85,7 +91,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <div class="col-md-6">
                 <h2 class="mt-5">เข้าสู่ระบบ</h2>
                 <?php 
-                if(!empty($login_err)){
+                if (!empty($login_err)) {
                     echo '<div class="alert alert-danger">' . $login_err . '</div>';
                 }        
                 ?>
