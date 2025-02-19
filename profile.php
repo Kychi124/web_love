@@ -50,7 +50,7 @@ $level = isset($_SESSION["level"]) ? $_SESSION["level"] : "user";
 <!-- โค้ดเนปบาร์ของคุณต่อไปนี้ -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container">
-        <a class="navbar-brand" href="#">ร้านค้าออนไลน์</a>
+        <a class="navbar-brand" href="index.php">ร้านค้าออนไลน์</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -64,35 +64,40 @@ $level = isset($_SESSION["level"]) ? $_SESSION["level"] : "user";
                         <i class="fas fa-shopping-cart"></i>
                         ตะกร้าสินค้า
                         <span class="badge bg-danger">
-                            <?php echo array_sum($_SESSION["cart"]); ?>
+                            <?php echo isset($_SESSION["cart"]) ? array_sum($_SESSION["cart"]) : 0; ?>
                         </span>
                     </a>
                 </li>
             </ul>
             <ul class="navbar-nav">
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
-                        <i class="fas fa-user"></i>
-                        <?php echo isset($_SESSION["email"]) ? htmlspecialchars($_SESSION["email"]) : "Guest"; ?>
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                        <?php if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true): ?>
-                            <li><a class="dropdown-item" href="login.php">เข้าสู่ระบบ</a></li>
-                            <li><a class="dropdown-item" href="register.php">ลงทะเบียน</a></li>
-                        <?php else: ?>
+                <?php if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true): ?>
+                    <li class="nav-item">
+                        <a class="nav-link" href="login.php">เข้าสู่ระบบ</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="register.php">ลงทะเบียน</a>
+                    </li>
+                <?php else: ?>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user"></i>
+                            <?php echo htmlspecialchars($_SESSION["email"]); ?>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                             <li><a class="dropdown-item" href="profile.php">Profile</a></li>
-                            <?php if ($level === "admin"): ?>
+                            <?php if (isset($_SESSION["user_level"]) && $_SESSION["user_level"] === "admin"): ?>
                                 <li><a class="dropdown-item" href="back_office.php">Back Office</a></li>
                             <?php endif; ?>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="logout.php">ออกจากระบบ</a></li>
-                        <?php endif; ?>
-                    </ul>
-                </li>
+                        </ul>
+                    </li>
+                <?php endif; ?>
             </ul>
         </div>
     </div>
 </nav>
+
 <!-- End Navbar -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
