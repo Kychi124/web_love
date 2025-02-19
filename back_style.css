@@ -1,25 +1,25 @@
 /* From Uiverse.io by SteveBloX */ 
 .card {
-    margin: 40px;
-    box-sizing: border-box;
-    width: 270px;
-    height: 160px;
-    background: rgba(217, 217, 217, 0.58);
-    border: 1px solid white;
-    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.15);
-    backdrop-filter: blur(6px);
-    border-radius: 8px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.5s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    user-select: none;
-    font-weight: bolder;
-    color: black;
+  margin: 40px;
+  box-sizing: border-box;
+  width: 270px;
+  height: 160px;
+  background: rgba(217, 217, 217, 0.58);
+  border: 1px solid white;
+  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(6px);
+  border-radius: 8px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.5s;  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  font-weight: bolder;
+  color: black;
+}
 
-  }
   
   .card:hover {
     transform: scale(1.04);

@@ -15,30 +15,6 @@ if (!isset($_SESSION["user_level"]) || $_SESSION["user_level"] !== "admin") {
     exit;
 }
 
-// เริ่มต้นตะกร้าสินค้าถ้ายังไม่มี
-if (!isset($_SESSION["cart"])) {
-    $_SESSION["cart"] = array();
-}
-
-// จัดการการเพิ่มสินค้าลงตะกร้า
-if (isset($_POST["add_to_cart"]) && isset($_POST["product_id"])) {
-    $product_id = $_POST["product_id"];
-    if (isset($_SESSION["cart"][$product_id])) {
-        $_SESSION["cart"][$product_id]++;
-    } else {
-        $_SESSION["cart"][$product_id] = 1;
-    }
-}
-
-// ดึงข้อมูลสินค้าทั้งหมด
-$sql = "SELECT p.*, c.name as category_name, 
-        (SELECT image_url FROM product_images WHERE product_id = p.product_id AND is_primary = 1 LIMIT 1) as primary_image
-        FROM products p
-        LEFT JOIN categories c ON p.category_id = c.category_id
-        WHERE p.status = 'active'
-        ORDER BY p.product_id DESC";
-$result = mysqli_query($conn, $sql);
-
 ?>
 
 <!DOCTYPE html>
@@ -90,7 +66,8 @@ $level = $_SESSION["user_level"];
 </nav>
 <!-- End Navbar -->
 <!-- From Uiverse.io by SteveBloX --> 
-<div class="card bg-gray-300/60 border border-white shadow-lg backdrop-blur-md rounded-lg text-center cursor-pointer transition-all duration-500 ease-in-out flex items-center justify-center select-none font-bold text-black hover:scale-105 active:scale-95 mx-10 my-10 w-[270px] h-[160px]">
+<div class="card bg-gray-300/60 border border-white shadow-lg backdrop-blur-md rounded-lg text-center cursor-pointer transition-all duration-500 ease-in-out flex items-center justify-center select-none font-bold text-black hover:scale-105 active:scale-95 mx-10 my-10 w-[270px] h-[160px]"
+    onclick="window.location.href='product.php'">
     เพิ่มสินค้า
 </div>
 
