@@ -1,37 +1,33 @@
 <?php
-// profile.php
+// index.php
 require_once "config.php";
 session_start();
 
+// ตรวจสอบการล็อกอิน
+if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
+    header("location: login.php");
+    exit;
+}
+
+// ตรวจสอบระดับผู้ใช้ (แก้ไข)
+$level = isset($_SESSION["user_level"]) ? $_SESSION["user_level"] : "user";
+
 // เริ่มต้นตะกร้าสินค้าถ้ายังไม่มี
-if(!isset($_SESSION["cart"])){
+if (!isset($_SESSION["cart"])) {
     $_SESSION["cart"] = array();
 }
 
-// จัดการการเพิ่มสินค้าลงตะกร้า
-if(isset($_POST["add_to_cart"]) && isset($_POST["product_id"])){
-    if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
-        // หากยังไม่ได้ล็อกอิน ให้แสดงข้อความและไม่สามารถเพิ่มสินค้าได้
-        header("location: login.php");
-        exit;
-    }
-
-    $product_id = $_POST["product_id"];
-    if(isset($_SESSION["cart"][$product_id])){
-        $_SESSION["cart"][$product_id]++;
-    } else {
-        $_SESSION["cart"][$product_id] = 1;
-    }
-}
-
 // ดึงข้อมูลสินค้าทั้งหมด
-$sql = "SELECT p.*, c.name as category_name, 
+$sql = "SELECT p.*, c.category_name, 
         (SELECT image_url FROM product_images WHERE product_id = p.product_id AND is_primary = 1 LIMIT 1) as primary_image
         FROM products p
         LEFT JOIN categories c ON p.category_id = c.category_id
         WHERE p.status = 'active'
         ORDER BY p.product_id DESC";
 $result = mysqli_query($conn, $sql);
+if (!$result) {
+    die("SQL Query Failed: " . mysqli_error($conn));
+}
 
 ?>
 
