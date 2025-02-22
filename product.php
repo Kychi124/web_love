@@ -1,5 +1,4 @@
 <?php
-// back_office.php
 require_once "config.php";
 session_start();
 
@@ -71,16 +70,16 @@ $level = $_SESSION["user_level"];
         </div>
     </div>
 </nav>
-<div class="page-point px-5 my-4 fs-5 flex justify-between items-center">
+<div class="d-flex justify-content-between align-items-center px-5 my-4 fs-5">
     <div>
         <a href="back_office.php" class="text-black">back office</a>
         >
         <a href="product.php" class="text-black">product management</a>
     </div>
     <button 
-        class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded shadow"
+        class="btn btn-success"
         onclick="window.location.href='product_add.php'">
-        ➕ Add Product
+        Add Product
     </button>
 </div>
     <div class="p-4 m-4 bg-light rounded">
