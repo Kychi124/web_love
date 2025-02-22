@@ -15,15 +15,16 @@ if (!isset($_SESSION["user_level"]) || $_SESSION["user_level"] !== "admin") {
     exit;
 }
 
-$sql_script = "SELECT product.*,categories.name
-                FROM product
-                JOIN categories ON product.category_id = categories.category_id";
-$result = mysqli_query($conn, $sql_script) or die(mysqli_error($conn));
+$sql_script = "SELECT products.*,categories.category_name
+                FROM products
+                JOIN categories ON products.category_id = categories.category_id";
+$result = mysqli_query($conn,$sql_script) or die(mysqli_error($conn));
 if(mysqli_num_rows($result)> 0){
     $row = mysqli_fetch_assoc($result);
 }else{
     $row = null;
 }
+$totalrows_result = mysqli_num_rows($result);
 
 ?>
 <!DOCTYPE html>
@@ -34,6 +35,7 @@ if(mysqli_num_rows($result)> 0){
     <title>Product - Admin</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 </head>
 <body>
 <?php
@@ -69,12 +71,20 @@ $level = $_SESSION["user_level"];
         </div>
     </div>
 </nav>
-    <div class="page-point px-3 my-2">
+<div class="page-point px-5 my-4 fs-5 flex justify-between items-center">
+    <div>
         <a href="back_office.php" class="text-black">back office</a>
         >
         <a href="product.php" class="text-black">product management</a>
     </div>
-            <table class="table">
+    <button 
+        class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded shadow"
+        onclick="window.location.href='product_add.php'">
+        ➕ Add Product
+    </button>
+</div>
+    <div class="p-4 m-4 bg-light rounded">
+        <table class="table table-hover">
         <thead class="thead-dark">
             <tr>
             <th>ลำดับ</th>
@@ -88,24 +98,37 @@ $level = $_SESSION["user_level"];
             <th>จัดการ</th>
             </tr>
         </thead>
+<?php 
+    if($row){
+        do{
+?>
         <tbody>
             <tr>
-            <th><?php echo $row['product_id'];?></th>
+            <td><?php echo $row['product_id'];?></td>
             <td><?php echo $row['product_name'];?></td>
-            <th><?php echo $row['category_name'];?></th>
-            <th><?php echo $row['weight'];?></th>
+            <td><?php echo $row['category_name'];?></td>
+            <td><?php echo $row['weight'];?></td>
             <td><?php echo $row['product_description'];?></td>
-            <th><?php echo $row['price'];?></th>
+            <td><?php echo $row['price'];?></td>
             <td><?php echo $row['cost_price'];?></td>
-            <th><?php echo $row['status'];?></th>
-            <th>
+            <td><?php echo $row['status'];?></td>
+            <td>
                 <button class="edit color-yellow" onclick="window.location.href='product_edit.php?usr_id=<?php echo $row['product_id'];?>'">แก้ไข</button>
                 <button class="delete color-red" onclick="window.location.href='product_delete.php?usr_id=<?php echo $row['product_id'];?>'">ลบ</button>
-            </th>
+            </td>
             </tr>
-            
+<?php 
+        }while($row = mysqli_fetch_assoc($result));
+    }else{
+        echo "<tr><td colspan ='8'>ไม่มีข้อมูลสินค้า</td></tr>";
+    }
+    ?>
         </tbody>
         </table>
-  
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 </body>
 </html>
