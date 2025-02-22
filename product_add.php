@@ -105,55 +105,94 @@ $level = $_SESSION["user_level"];
         </div>
     </div>
 </nav>
-<div class="container mt-5 p-4 bg-light rounded">
+<div class="container mt-5 mb-5 p-5 bg-light rounded">
     <h2 class="text-center m-3">เพิ่มสินค้า</h2>
-    <form action="product_add.php" method="post" enctype="multipart/form-data">
-        <div class="mb-3">
+    <form id="productForm" class="needs-validation row g-3" action="product_add.php" method="post" enctype="multipart/form-data" novalidate>
+        <div class="col-md-6">
             <label class="form-label">ชื่อสินค้า</label>
             <input type="text" name="product_name" class="form-control" required>
+            <div class="valid-feedback"></div>
+            <div class="invalid-feedback">กรุณากรอกชื่อสินค้า</div>
         </div>
 
-        <div class="mb-3">
+        <div class="col-md-6">
             <label class="form-label">รายละเอียดสินค้า</label>
-            <textarea name="product_description" class="form-control"></textarea>
+            <textarea name="product_description" class="form-control" required></textarea>
+            <div class="valid-feedback"></div>
+            <div class="invalid-feedback">กรุณากรอกรายละเอียดสินค้า</div>
         </div>
 
-        <div class="mb-3">
-            <label class="form-label">หมวดหมู่</label>
-            <select name="category_id" class="form-control" required>
+        <div class="col-md-6">
+            <label class="form-label">ประเภทสินค้า</label>
+            <select name="category_id" class="form-select" required>
                 <?php echo generateOption("categories", "category_id", "category_name"); ?>
             </select>
+            <div class="valid-feedback"></div>
+            <div class="invalid-feedback">กรุณาเลือกประเภทสินค้า</div>
         </div>
 
-        <div class="mb-3">
-            <label class="form-label">ราคาขาย</label>
-            <input type="number" name="price" class="form-control" required>
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label">ราคาต้นทุน</label>
-            <input type="number" name="cost_price" class="form-control" required>
-        </div>
-
-        <div class="mb-3">
+        <div class="col-md-6">
             <label class="form-label">สถานะสินค้า</label>
-            <select name="status" class="form-control">
+            <select name="status" class="form-select" required>
+                <option value="">เลือกสถานะ</option>
                 <option value="available">มีสินค้า</option>
                 <option value="out_of_stock">หมด</option>
             </select>
+            <div class="valid-feedback"></div>
+            <div class="invalid-feedback">กรุณาเลือกสถานะสินค้า</div>
         </div>
 
-        <div class="mb-3">
+        <div class="col-md-6">
+            <label class="form-label">ราคาขาย</label>
+            <div class="input-group has-validation">
+                <span class="input-group-text">฿</span>
+                <input type="number" name="price" class="form-control" required>
+                <span class="input-group-text">.00</span>
+                <div class="valid-feedback"></div>
+                <div class="invalid-feedback">กรุณากรอกราคาขาย</div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label">ราคาต้นทุน</label>
+            <div class="input-group has-validation">
+                <span class="input-group-text">฿</span>
+                <input type="number" name="cost_price" class="form-control" required>
+                <span class="input-group-text">.00</span>
+                <div class="valid-feedback"></div>
+                <div class="invalid-feedback">กรุณากรอกราคาต้นทุน</div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
             <label class="form-label">อัปโหลดรูปภาพ</label>
-            <input type="file" name="product_images[]" class="form-control" multiple>
+            <input type="file" name="product_images[]" class="form-control" multiple required>
+            <div class="valid-feedback"></div>
+            <div class="invalid-feedback">กรุณาอัปโหลดรูปภาพสินค้า</div>
         </div>
 
-        <div class="text-center my-5 ">
-            <button type="submit" class="btn btn-success btn-lg">เพิ่มสินค้า</button>
+        <div class="col-12 text-center mt-4">
+            <button class="btn btn-success btn-lg" type="submit">เพิ่มสินค้า</button>
             <a href="product.php" class="btn btn-danger btn-lg">ยกเลิก</a>
         </div>
     </form>
 </div>
+    <script>
+        (function () {
+            'use strict';
+            var forms = document.querySelectorAll('.needs-validation');
+
+            Array.prototype.slice.call(forms).forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        })();
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
