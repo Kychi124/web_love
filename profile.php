@@ -128,22 +128,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     </a>
                 </li>
             </ul>
-            <ul class="navbar-nav">
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
-                        <i class="fas fa-user"></i>
-                        <?php echo isset($_SESSION["email"]) ? htmlspecialchars($_SESSION["email"]) : "Guest"; ?>
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                        <li><a class="dropdown-item" href="profile.php">Profile</a></li>
-                        <?php if ($level === "admin"): ?>
-                            <li><a class="dropdown-item" href="back_office.php">Back Office</a></li>
-                        <?php endif; ?>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="logout.php">ออกจากระบบ</a></li>
-                    </ul>
-                </li>
-            </ul>
+
         </div>
     </div>
 </nav>
@@ -217,6 +202,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <div class="text-center">
             <button type="submit" name="submit" class="btn btn-success">บันทึก</button>
             <a href="address.php" class="btn btn-primary">แก้ไขที่อยู่</a>
+            <a href="index.php" class="btn btn-danger" color="red" >กลับสู่หน้าแรก</a>
         </div>
     </form>
 </div>

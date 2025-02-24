@@ -1,5 +1,4 @@
 <?php
-// index.php
 require_once "config.php";
 session_start();
 
@@ -29,12 +28,52 @@ if (!$result) {
     die("SQL Query Failed: " . mysqli_error($conn));
 }
 
+// ตรวจสอบการเพิ่มที่อยู่
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $address_type = $_POST["address_type"];
+    $address_line1 = $_POST["address_line1"];
+    $address_line2 = $_POST["address_line2"];
+    $city = $_POST["city"];
+    $state = $_POST["state"];
+    $postal_code = $_POST["postal_code"];
+    $country = $_POST["country"];
+    $is_default = isset($_POST["is_default"]) ? 1 : 0;
+
+    // คำสั่ง SQL สำหรับเพิ่มที่อยู่
+    $sql = "INSERT INTO user_addresses (user_id, address_type, address_line1, address_line2, city, state, postal_code, country, is_default) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    $stmt = mysqli_prepare($conn, $sql);
+
+    if (!$stmt) {
+        die("เกิดข้อผิดพลาด SQL: " . mysqli_error($conn));
+    }
+
+    mysqli_stmt_bind_param($stmt, "isssssssi", $user_id, $address_type, $address_line1, $address_line2, $city, $state, $postal_code, $country, $is_default);
+
+    if (mysqli_stmt_execute($stmt)) {
+        $_SESSION["success"] = "เพิ่มที่อยู่เรียบร้อยแล้ว!";
+        header("location: address.php");
+        exit;
+    } else {
+        $_SESSION["error"] = "เกิดข้อผิดพลาดในการเพิ่มที่อยู่!";
+    }
+}
+
+// ดึงข้อมูลที่อยู่ที่บันทึกไว้สำหรับผู้ใช้
+$user_id = $_SESSION["user_id"]; // สมมติว่า user_id ถูกบันทึกไว้ใน session
+$sql_addresses = "SELECT * FROM user_addresses WHERE user_id = ?";
+$stmt_addresses = mysqli_prepare($conn, $sql_addresses);
+mysqli_stmt_bind_param($stmt_addresses, "i", $user_id);
+mysqli_stmt_execute($stmt_addresses);
+$result_addresses = mysqli_stmt_get_result($stmt_addresses);
+
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="th">
 <head>
-    <title>ร้านค้าออนไลน์</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เพิ่มที่อยู่</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
@@ -60,23 +99,7 @@ if (!$result) {
                         </span>
                     </a>
                 </li>
-            </ul>
-            <ul class="navbar-nav">
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
-                        <i class="fas fa-user"></i>
-                        <?php echo isset($_SESSION["email"]) ? htmlspecialchars($_SESSION["email"]) : "Guest"; ?>
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                        <li><a class="dropdown-item" href="profile.php">โปรไฟล์</a></li>
-                        <?php if ($level === "admin"): ?>
-                            <li><a class="dropdown-item" href="back_office.php">การจัดการหลังบ้าน</a></li>
-                        <?php endif; ?>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="logout.php">ออกจากระบบ</a></li>
-                    </ul>
-                </li>
-            </ul>
+
         </div>
     </div>
 </nav>
@@ -111,6 +134,46 @@ if (!$result) {
         </div>
         <?php endwhile; ?>
     </div>
+</div>
+
+<div class="container mt-5">
+    <h2 class="text-center">ที่อยู่ที่บันทึกไว้</h2>
+    
+
+    <div class="text-end mb-4"> <!-- ใช้ text-end เพื่อจัดแนวไปทางขวา -->
+        <a href="add_address.php" class="btn btn-success">เพิ่มที่อยู่</a>
+        <a href="index.php" class="btn btn-danger">กลับ</a>
+    </div>
+    
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ประเภทที่อยู่</th>
+                <th>ที่อยู่</th>
+                <th>เมือง</th>
+                <th>รัฐ/จังหวัด</th>
+                <th>รหัสไปรษณีย์</th>
+                <th>ประเทศ</th>
+                <th>การดำเนินการ</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php while ($address = mysqli_fetch_assoc($result_addresses)): ?>
+                <tr>
+                    <td><?php echo htmlspecialchars($address['address_type']); ?></td>
+                    <td><?php echo htmlspecialchars($address['address_line1']); ?> <?php echo htmlspecialchars($address['address_line2']); ?></td>
+                    <td><?php echo htmlspecialchars($address['city']); ?></td>
+                    <td><?php echo htmlspecialchars($address['state']); ?></td>
+                    <td><?php echo htmlspecialchars($address['postal_code']); ?></td>
+                    <td><?php echo htmlspecialchars($address['country']); ?></td>
+                    <td>
+                        <a href="address_edit.php?address_id=<?php echo $address['address_id']; ?>" class="btn btn-warning btn-sm">แก้ไข</a>
+                        <a href="address_delete.php?address_id=<?php echo $address['address_id']; ?>" class="btn btn-danger btn-sm">ลบ</a>
+                    </td>
+                </tr>
+            <?php endwhile; ?>
+        </tbody>
+    </table>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
