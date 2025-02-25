@@ -96,6 +96,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 
+
+
 ?>
 
 <!DOCTYPE html>
@@ -165,8 +167,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </div>
 </div>
 
-<div class="container mt-5">
-    <h2 class="text-center">แก้ไขโปรไฟล์</h2>
+
+
+        <div class="container mt-5">
+    <div class="text-end mb-4"> <!-- ใช้ text-end เพื่อจัดแนวไปทางขวา -->
+    <a href="index.php" class="btn btn-danger" color="red" >กลับสู่หน้าแรก</a>
+    </div>
+
+        <h2 class="text-center">แก้ไขโปรไฟล์</h2>
 
     <?php if (isset($_SESSION["success"])): ?>
         <div class="alert alert-success"><?php echo $_SESSION["success"]; unset($_SESSION["success"]); ?></div>
@@ -176,6 +184,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <div class="alert alert-danger"><?php echo $_SESSION["error"]; unset($_SESSION["error"]); ?></div>
     <?php endif; ?>
 
+
+
     <form action="profile.php" method="post" enctype="multipart/form-data">
         <div class="mb-3 text-center">
             <img src="web_love/images_account/<?php echo !empty($user['user_images']) ? $user['user_images'] : 'default.png'; ?>" 
@@ -183,6 +193,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <br>
             <input type="file" name="profile_image" class="form-control mt-2" required>
         </div>
+
 
         <div class="mb-3">
             <label class="form-label">ชื่อ</label>
@@ -202,7 +213,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <div class="text-center">
             <button type="submit" name="submit" class="btn btn-success">บันทึก</button>
             <a href="address.php" class="btn btn-primary">แก้ไขที่อยู่</a>
-            <a href="index.php" class="btn btn-danger" color="red" >กลับสู่หน้าแรก</a>
+            <a href="profile_pass_edit.php" class="btn btn-warning">เปลี่ยนรหัสผ่าน</a>
         </div>
     </form>
 </div>

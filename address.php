@@ -138,13 +138,29 @@ $result_addresses = mysqli_stmt_get_result($stmt_addresses);
 
 <div class="container mt-5">
     <h2 class="text-center">ที่อยู่ที่บันทึกไว้</h2>
-    
 
-    <div class="text-end mb-4"> <!-- ใช้ text-end เพื่อจัดแนวไปทางขวา -->
+    <!-- แสดงข้อความแจ้งเตือน และลบค่าทันที -->
+    <?php if (isset($_SESSION["success"])): ?>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <?php echo $_SESSION["success"]; ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <?php unset($_SESSION["success"]); // ลบค่า session หลังแสดง ?>
+    <?php endif; ?>
+
+    <?php if (isset($_SESSION["error"])): ?>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <?php echo $_SESSION["error"]; ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <?php unset($_SESSION["error"]); // ลบค่า session หลังแสดง ?>
+    <?php endif; ?>
+
+    <div class="text-end mb-4">
         <a href="add_address.php" class="btn btn-success">เพิ่มที่อยู่</a>
-        <a href="index.php" class="btn btn-danger">กลับ</a>
+        <a href="profile.php" class="btn btn-danger">กลับ</a>
     </div>
-    
+
     <table class="table">
         <thead>
             <tr>
@@ -168,13 +184,18 @@ $result_addresses = mysqli_stmt_get_result($stmt_addresses);
                     <td><?php echo htmlspecialchars($address['country']); ?></td>
                     <td>
                         <a href="address_edit.php?address_id=<?php echo $address['address_id']; ?>" class="btn btn-warning btn-sm">แก้ไข</a>
-                        <a href="address_delete.php?address_id=<?php echo $address['address_id']; ?>" class="btn btn-danger btn-sm">ลบ</a>
+                        <a href="address_delete.php?address_id=<?php echo $address['address_id']; ?>" 
+                           class="btn btn-danger btn-sm"
+                           onclick="return confirm('คุณแน่ใจหรือไม่ว่าต้องการลบที่อยู่นี้?');">
+                           ลบ
+                        </a>
                     </td>
                 </tr>
             <?php endwhile; ?>
         </tbody>
     </table>
 </div>
+
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
