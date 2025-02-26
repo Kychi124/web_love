@@ -2,25 +2,66 @@
 require_once "config.php";
 session_start();
 
-// 🛑 ป้องกันการเข้าถึงถ้าไม่ได้ล็อกอิน
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+// 🛑 ป้องกันการเข้าถึง
 if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
     header("location: login.php");
     exit;
 }
 
-// 🛑 จำกัดการเข้าถึงเฉพาะ Admin เท่านั้น
 if (!isset($_SESSION["user_level"]) || $_SESSION["user_level"] !== "admin") {
     header("location: index.php");
     exit;
 }
 
-// 🛠️ ดึงข้อมูลสินค้า
-$product_id = $_GET['id'];
-$query = "SELECT * FROM products WHERE product_id = '$product_id'";
-$result = mysqli_query($conn, $query);
+if (!isset($_GET["id"]) || empty($_GET["id"])) {
+    header("location: product.php");
+    exit;
+}
+
+$product_id = $_GET["id"];
+
+// ✅ ดึงข้อมูลสินค้า
+$sql = "SELECT * FROM products WHERE product_id = ?";
+$stmt = mysqli_prepare($conn, $sql);
+mysqli_stmt_bind_param($stmt, "i", $product_id);
+mysqli_stmt_execute($stmt);
+$result = mysqli_stmt_get_result($stmt);
 $product = mysqli_fetch_assoc($result);
 
-// ✅ แก้ไขสินค้า
+if (!$product) {
+    echo "<script>alert('ไม่พบข้อมูลสินค้า'); window.location.href='product.php';</script>";
+    exit;
+}
+
+// ✅ ดึงรูปภาพสินค้า
+$images = [];
+$sql_images = "SELECT * FROM product_images WHERE product_id = ?";
+$stmt_images = mysqli_prepare($conn, $sql_images);
+mysqli_stmt_bind_param($stmt_images, "i", $product_id);
+mysqli_stmt_execute($stmt_images);
+$result_images = mysqli_stmt_get_result($stmt_images);
+while ($row = mysqli_fetch_assoc($result_images)) {
+    $images[] = $row;
+}
+
+// ✅ ฟังก์ชันดึงข้อมูล Category Options
+function generateOption($table, $id_field, $name_field, $selected_id) {
+    global $conn;
+    $options = "";
+    $sql = "SELECT * FROM $table";
+    $result = mysqli_query($conn, $sql);
+
+    while ($row = mysqli_fetch_assoc($result)) {
+        $selected = ($row[$id_field] == $selected_id) ? "selected" : "";
+        $options .= "<option value='{$row[$id_field]}' $selected>{$row[$name_field]}</option>";
+    }
+    return $options;
+}
+
+// ✅ อัปเดตสินค้า
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $name = mysqli_real_escape_string($conn, $_POST["product_name"]);
     $description = mysqli_real_escape_string($conn, $_POST["product_description"]);
@@ -29,27 +70,29 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $cost_price = $_POST["cost_price"];
     $status = $_POST["status"];
 
-    // 🛠️ UPDATE สินค้าใน DB
-    $sql = "UPDATE products SET product_name='$name', product_description='$description', category_id='$category_id', price='$price', cost_price='$cost_price', status='$status' WHERE product_id='$product_id'";
+    // 🛠️ UPDATE สินค้า
+    $sql_update = "UPDATE products SET product_name=?, product_description=?, category_id=?, price=?, cost_price=?, status=? WHERE product_id=?";
+    $stmt_update = mysqli_prepare($conn, $sql_update);
+    mysqli_stmt_bind_param($stmt_update, "ssiddsi", $name, $description, $category_id, $price, $cost_price, $status, $product_id);
 
-    if (mysqli_query($conn, $sql)) {
-        // 🖼️ อัปโหลดรูปภาพ (หลายรูป)
+    if (mysqli_stmt_execute($stmt_update)) {
+        // 🖼️ อัปโหลดรูปใหม่ (ถ้ามี)
         if (!empty($_FILES["product_images"]["name"][0])) {
             foreach ($_FILES["product_images"]["tmp_name"] as $key => $tmp_name) {
-                if ($_FILES["product_images"]["error"][$key] == 0) { // ตรวจสอบว่าไม่มีข้อผิดพลาด
+                if ($_FILES["product_images"]["error"][$key] == 0) {
                     $image_name = uniqid() . "_" . basename($_FILES["product_images"]["name"][$key]);
                     $target_path = "uploads/" . $image_name;
 
                     if (move_uploaded_file($tmp_name, $target_path)) {
-                        // บันทึกรูปภาพลงฐานข้อมูล
+                        // บันทึกรูปภาพใหม่
                         mysqli_query($conn, "INSERT INTO product_images (product_id, image_url) VALUES ('$product_id', '$image_name')");
                     }
                 }
             }
         }
-        echo "<script>alert('แก้ไขสินค้าสำเร็จ!'); window.location.href='product.php';</script>";
-    } else {
-        echo "Error: " . mysqli_error($conn);
+
+        header("Location: product.php");
+        exit;
     }
 }
 ?>
@@ -58,13 +101,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Product Edit - Admin</title>
+    <title>แก้ไขสินค้า - Admin</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-
 <?php
 // ✅ ดึงระดับผู้ใช้จาก session
 $level = $_SESSION["user_level"];
@@ -98,48 +138,39 @@ $level = $_SESSION["user_level"];
 
 <div class="container mt-5 mb-5 p-5 bg-light rounded">
     <h2 class="text-center m-3">แก้ไขสินค้า</h2>
-    <form id="productForm" class="needs-validation row g-3" action="product_edit.php?id=<?php echo $product_id; ?>" method="post" enctype="multipart/form-data" novalidate>
+    <form action="product_edit.php?id=<?php echo $product_id; ?>" method="post" enctype="multipart/form-data" class="row g-3">
+        
         <div class="col-md-6">
             <label class="form-label">ชื่อสินค้า*</label>
             <input type="text" name="product_name" class="form-control" value="<?php echo htmlspecialchars($product['product_name']); ?>" required>
-            <div class="valid-feedback"></div>
-            <div class="invalid-feedback">กรุณากรอกชื่อสินค้า</div>
         </div>
 
         <div class="col-md-6">
             <label class="form-label">รายละเอียดสินค้า</label>
-            <textarea name="product_description" class="form-control" required><?php echo htmlspecialchars($product['product_description']); ?></textarea>
-            <div class="valid-feedback"></div>
-            <div class="invalid-feedback">กรุณากรอกรายละเอียดสินค้า</div>
+            <textarea name="product_description" class="form-control"><?php echo htmlspecialchars($product['product_description']); ?></textarea>
         </div>
 
         <div class="col-md-6">
             <label class="form-label">ประเภทสินค้า*</label>
-            <select name="category_id" class="form-select" required>
-                <?php echo generateOption("categories", "category_id", "category_name", $product['category_id']); ?>
+            <select name="category_id" class="form-select">
+                <?php echo generateOption("categories", "category_id", "category_name", $product["category_id"]); ?>
             </select>
-            <div class="valid-feedback"></div>
-            <div class="invalid-feedback">กรุณาเลือกประเภทสินค้า</div>
         </div>
 
         <div class="col-md-6">
             <label class="form-label">สถานะสินค้า*</label>
-            <select name="status" class="form-select" required>
-                <option value="available" <?php echo $product['status'] == 'available' ? 'selected' : ''; ?>>มีสินค้า</option>
-                <option value="out_of_stock" <?php echo $product['status'] == 'out_of_stock' ? 'selected' : ''; ?>>หมด</option>
+            <select name="status" class="form-select">
+                <option value="available" <?php echo ($product["status"] == "available") ? "selected" : ""; ?>>มีสินค้า</option>
+                <option value="out_of_stock" <?php echo ($product["status"] == "out_of_stock") ? "selected" : ""; ?>>หมด</option>
             </select>
-            <div class="valid-feedback"></div>
-            <div class="invalid-feedback">กรุณาเลือกสถานะสินค้า</div>
         </div>
 
         <div class="col-md-6">
             <label class="form-label">ราคาขาย*</label>
-            <div class="input-group has-validation">
+            <div class="input-group has-validation"> 
                 <span class="input-group-text">฿</span>
-                <input type="number" name="price" class="form-control" value="<?php echo htmlspecialchars($product['price']); ?>" required>
+                <input type="number" name="price" class="form-control" value="<?php echo $product['price']; ?>" required>
                 <span class="input-group-text">.00</span>
-                <div class="valid-feedback"></div>
-                <div class="invalid-feedback">กรุณากรอกราคาขาย</div>
             </div>
         </div>
 
@@ -147,90 +178,143 @@ $level = $_SESSION["user_level"];
             <label class="form-label">ราคาต้นทุน*</label>
             <div class="input-group has-validation">
                 <span class="input-group-text">฿</span>
-                <input type="number" name="cost_price" class="form-control" value="<?php echo htmlspecialchars($product['cost_price']); ?>" required>
+                <input type="number" name="cost_price" class="form-control" value="<?php echo $product['cost_price']; ?>" required>
                 <span class="input-group-text">.00</span>
-                <div class="valid-feedback"></div>
-                <div class="invalid-feedback">กรุณากรอกราคาต้นทุน</div>
             </div>
         </div>
 
+        <!-- 🔹 อัปโหลดรูปภาพใหม่ -->
         <div class="col-md-6">
-            <label class="form-label">อัปโหลดรูปภาพสินค้า*</label>
-            <input type="file" name="product_images[]" id="product_images" class="form-control" multiple accept="image/*" onchange="addImages()">
-            <div class="valid-feedback"></div>
-            <div class="invalid-feedback">กรุณาอัปโหลดรูปภาพสินค้า</div>
+            <label class="form-label">อัปโหลดรูปภาพใหม่</label>
+            <input type="file" id="product_images" name="product_images[]" class="form-control" multiple accept="image/*" onchange="previewNewImages()">
         </div>
 
-        <!-- 🔹 แสดงตัวอย่างรูป -->
+        <!-- 🔹 พรีวิวรูปภาพใหม่ -->
         <div class="col-md-12">
-            <label class="form-label">ตัวอย่างรูปภาพ</label>
-            <div id="imagePreview" class="d-flex flex-wrap gap-2"></div>
+            <label class="form-label">พรีวิวรูปใหม่</label>
+            <div id="newImagePreview" class="d-flex flex-wrap"></div>
         </div>
 
-        <div class="col-12 text-center mt-4">
-            <button class="btn btn-success btn-lg" type="submit">แก้ไขสินค้า</button>
+        <!-- 🔹 แสดงรูปภาพเก่าที่มีอยู่แล้ว -->
+        <div class="col-md-12">
+            <label class="form-label">รูปภาพปัจจุบัน</label>
+            <div class="d-flex flex-wrap">
+                <?php foreach ($images as $img) : ?>
+                    <div class="position-relative me-2">
+                        <img src="uploads/<?php echo $img['image_url']; ?>" class="img-thumbnail" style="width: 100px; height: 100px;">
+                        <a href="delete_image.php?image_id=<?php echo $img['image_id']; ?>&product_id=<?php echo $product_id; ?>" class="btn btn-danger btn-sm position-absolute" style="top: 5px; right: 5px;">&times;</a>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+
+        <div class="text-center mt-4">
+            <button class="btn btn-primary btn-lg" type="submit">บันทึก</button>
             <a href="product.php" class="btn btn-danger btn-lg">ยกเลิก</a>
         </div>
     </form>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
-// เพิ่มโค้ด JavaScript ที่เหมือนเดิมเพื่อจัดการการแสดงตัวอย่างภาพและการลบภาพ
-let selectedImages = [];
+    function previewNewImages() {
+        let input = document.getElementById("product_images");
+        let previewContainer = document.getElementById("newImagePreview");
 
-function addImages() {
-    let input = document.getElementById("product_images");
-    let files = Array.from(input.files);
-    selectedImages = selectedImages.concat(files);
-    updateFileInput();
-    previewImages();
-}
+        previewContainer.innerHTML = ""; // เคลียร์พรีวิวก่อนแสดงใหม่
 
-function previewImages() {
-    let previewContainer = document.getElementById("imagePreview");
-    previewContainer.innerHTML = "";
+        if (input.files) {
+            Array.from(input.files).forEach(file => {
+                if (file.type.startsWith("image/")) { // ตรวจสอบว่าเป็นไฟล์รูปภาพ
+                    let reader = new FileReader();
+                    reader.onload = function (e) {
+                        let imgContainer = document.createElement("div");
+                        imgContainer.className = "position-relative me-2";
 
-    selectedImages.forEach((file, index) => {
-        let reader = new FileReader();
-        reader.onload = function (e) {
-            let imgContainer = document.createElement("div");
-            imgContainer.className = "position-relative";
+                        let img = document.createElement("img");
+                        img.src = e.target.result;
+                        img.className = "img-thumbnail";
+                        img.style = "width: 100px; height: 100px; object-fit: cover; margin: 5px;";
 
-            let img = document.createElement("img");
-            img.src = e.target.result;
-            img.className = "img-thumbnail";
-            img.style = "width: 150px; height: 150px; object-fit: cover; margin: 5px;";
+                        // 🔹 ปุ่มลบรูป
+                        let removeBtn = document.createElement("button");
+                        removeBtn.className = "btn btn-danger btn-sm position-absolute";
+                        removeBtn.style = "top: 5px; right: 5px;";
+                        removeBtn.innerHTML = "&times;";
+                        removeBtn.onclick = function () {
+                            removeNewImage(file);
+                        };
 
-            let removeBtn = document.createElement("button");
-            removeBtn.className = "btn btn-danger btn-sm position-absolute";
-            removeBtn.style = "top: 5px; right: 5px;";
-            removeBtn.innerHTML = "&times;";
-            removeBtn.onclick = function () {
-                removeImage(index);
-            };
+                        imgContainer.appendChild(img);
+                        imgContainer.appendChild(removeBtn);
+                        previewContainer.appendChild(imgContainer);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+    }
 
-            imgContainer.appendChild(img);
-            imgContainer.appendChild(removeBtn);
-            previewContainer.appendChild(imgContainer);
-        };
+    function removeNewImage(file) {
+        let input = document.getElementById("product_images");
+        let dt = new DataTransfer();
+        Array.from(input.files).forEach(f => {
+            if (f !== file) {
+                dt.items.add(f);
+            }
+        });
+        input.files = dt.files;
+        previewNewImages();
+    }
+</script>
+<script>
+    document.getElementById("productForm").addEventListener("submit", function(event) {
+        let productName = document.querySelector('input[name="product_name"]').value.trim();
+        let category = document.querySelector('select[name="category_id"]').value;
+        let price = parseFloat(document.querySelector('input[name="price"]').value);
+        let costPrice = parseFloat(document.querySelector('input[name="cost_price"]').value);
+        let status = document.querySelector('select[name="status"]').value;
 
-        reader.readAsDataURL(file);
+        // 📌 เช็คว่ากรอกครบทุกช่องหรือไม่
+        if (!productName || !category || isNaN(price) || isNaN(costPrice) || !status) {
+            event.preventDefault();
+            Swal.fire({
+                icon: 'warning',
+                title: 'กรุณากรอกข้อมูลให้ครบ!',
+                text: 'โปรดตรวจสอบว่าคุณกรอกข้อมูลครบทุกช่อง',
+                confirmButtonColor: '#d33',
+                confirmButtonText: 'ตกลง'
+            });
+            return;
+        }
+
+        // 📌 เช็คราคาขายห้ามต่ำกว่าต้นทุน
+        if (price < costPrice) {
+            event.preventDefault();
+            Swal.fire({
+                icon: 'error',
+                title: 'ราคาขายต้องมากกว่าราคาต้นทุน!',
+                text: 'กรุณากรอกราคาขายให้ถูกต้อง',
+                confirmButtonColor: '#d33',
+                confirmButtonText: 'ตกลง'
+            });
+            return;
+        }
+
+        if (successMessage) {
+            Swal.fire({
+                icon: 'success',
+                title: 'แก้ไขสำเร็จ!',
+                text: successMessage,
+                confirmButtonColor: '#28a745',
+                confirmButtonText: 'ตกลง'
+            });
+            sessionStorage.removeItem("success_message"); // ลบค่าหลังแสดงแล้ว
+        }
     });
-}
-
-function removeImage(index) {
-    selectedImages.splice(index, 1);
-    updateFileInput();
-    previewImages();
-}
-
-function updateFileInput() {
-    let dt = new DataTransfer();
-    selectedImages.forEach(file => dt.items.add(file));
-    document.getElementById("product_images").files = dt.files;
-}
 </script>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
