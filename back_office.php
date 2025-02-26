@@ -26,7 +26,6 @@ if (!isset($_SESSION["user_level"]) || $_SESSION["user_level"] !== "admin") {
     <link rel="stylesheet" href="back_style.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-</head>
 <body>
 
 <?php
@@ -66,12 +65,21 @@ $level = $_SESSION["user_level"];
 </nav>
 <!-- End Navbar -->
 <!-- From Uiverse.io by SteveBloX --> 
-<div class="card bg-gray-300/60 border border-white shadow-lg backdrop-blur-md rounded-lg text-center cursor-pointer transition-all duration-500 ease-in-out flex items-center justify-center select-none font-bold text-black hover:scale-105 active:scale-95 mx-10 my-10 w-[270px] h-[160px]"
-    onclick="window.location.href='product.php'">
-    เพิ่มสินค้า
+<div class="flxe gap-5 mx-10 my-10">
+    <!-- การ์ดที่ 1 -->
+    <div class="card bg-gray-300/60 border border-white shadow-lg backdrop-blur-md rounded-lg text-center cursor-pointer transition-all duration-500 ease-in-out flex items-center justify-center select-none font-bold text-black hover:scale-105 active:scale-95 w-[270px] h-[160px]" onclick="window.location.href='product.php'">
+        เพิ่มสินค้า
+    </div>
+
+    <!-- การ์ดที่ 2 -->
+    <div class="card bg-gray-300/60 border border-white shadow-lg backdrop-blur-md rounded-lg text-center cursor-pointer transition-all duration-500 ease-in-out flex items-center justify-center select-none font-bold text-black hover:scale-105 active:scale-95 w-[270px] h-[160px]" onclick="window.location.href='categorie.php'">
+        เพิ่มประเภทสินค้า
+    </div>
 </div>
 
 
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
 </body>
 </html>

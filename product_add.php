@@ -109,11 +109,9 @@ $level = $_SESSION["user_level"];
 <div class="container mt-5 mb-5 p-5 bg-light rounded">
     <h2 class="text-center m-3">เพิ่มสินค้า</h2>
     <form id="productForm" class="needs-validation row g-3" action="product_add.php" method="post" enctype="multipart/form-data" novalidate>
-    <div class="col-md-6">
+        <div class="col-md-6">
             <label class="form-label">ชื่อสินค้า*</label>
             <input type="text" name="product_name" class="form-control" required>
-            <div class="valid-feedback"></div>
-            <div class="invalid-feedback">กรุณากรอกชื่อสินค้า</div>
         </div>
 
         <div class="col-md-6">
@@ -139,8 +137,6 @@ $level = $_SESSION["user_level"];
                 <option value="available">มีสินค้า</option>
                 <option value="out_of_stock">หมด</option>
             </select>
-            <div class="valid-feedback"></div>
-            <div class="invalid-feedback">กรุณาเลือกสถานะสินค้า</div>
         </div>
 
         <div class="col-md-6">
@@ -149,8 +145,6 @@ $level = $_SESSION["user_level"];
                 <span class="input-group-text">฿</span>
                 <input type="number" name="price" class="form-control" required>
                 <span class="input-group-text">.00</span>
-                <div class="valid-feedback"></div>
-                <div class="invalid-feedback">กรุณากรอกราคาขาย</div>
             </div>
         </div>
 
@@ -160,10 +154,9 @@ $level = $_SESSION["user_level"];
                 <span class="input-group-text">฿</span>
                 <input type="number" name="cost_price" class="form-control" required>
                 <span class="input-group-text">.00</span>
-                <div class="valid-feedback"></div>
-                <div class="invalid-feedback">กรุณากรอกราคาต้นทุน</div>
             </div>
         </div>
+
         <div class="col-md-6">
             <label class="form-label">อัปโหลดรูปภาพสินค้า*</label>
             <input type="file" name="product_images[]" id="product_images" class="form-control" multiple accept="image/*" onchange="addImages()">
