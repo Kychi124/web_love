@@ -72,6 +72,7 @@ if (!$result) {
                         <?php if ($level === "admin"): ?>
                             <li><a class="dropdown-item" href="back_office.php">การจัดการหลังบ้าน</a></li>
                         <?php endif; ?>
+                        <li><a class="dropdown-item" href="orders_show.php">คำสั่งซื้อ</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item" href="logout.php">ออกจากระบบ</a></li>
                     </ul>

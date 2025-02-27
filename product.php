@@ -61,6 +61,7 @@ $level = $_SESSION["user_level"];
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                         <li><a class="dropdown-item" href="profile.php">โปรไฟล์</a></li>
                         <li><a class="dropdown-item" href="index.php">หน้าแรก</a></li>
+                        <li><a class="dropdown-item" href="orders_show.php">คำสั่งซื้อ</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item" href="logout.php">ออกจากระบบ</a></li>
                     </ul>

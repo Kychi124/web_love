@@ -96,8 +96,8 @@ $result = mysqli_stmt_get_result($stmt);
         <div class="mb-3">
             <label class="form-label">ประเภทที่อยู่</label>
             <select name="address_type" class="form-control" required>
+                <option value="blank"></option>
                 <option value="billing">ที่อยู่สำหรับการเรียกเก็บเงิน</option>
-                <option value="shipping">ที่อยู่สำหรับการจัดส่ง</option>
             </select>
         </div>
 

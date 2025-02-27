@@ -10,7 +10,7 @@ if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true || $_SESSION
 
 // 🛑 รับค่า category_id ที่ต้องลบ
 if (!isset($_GET["id"]) || empty($_GET["id"])) {
-    header("location: categorie.php");
+    header("location:categorie.php");
     exit;
 }
 
@@ -24,7 +24,7 @@ mysqli_stmt_execute($stmt);
 $result = mysqli_stmt_get_result($stmt);
 
 if (mysqli_num_rows($result) == 0) {
-    header("location: categorie.php");
+    header("location:categorie.php");
     exit;
 }
 
@@ -66,6 +66,7 @@ $level = $_SESSION["user_level"];
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                         <li><a class="dropdown-item" href="profile.php">โปรไฟล์</a></li>
                         <li><a class="dropdown-item" href="index.php">หน้าแรก</a></li>
+                        <li><a class="dropdown-item" href="orders_show.php">คำสั่งซื้อ</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item" href="logout.php">ออกจากระบบ</a></li>
                     </ul>
